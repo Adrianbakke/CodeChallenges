@@ -14,8 +14,7 @@ for x in X:
         res += 1
         continue
     for j in range(len(x)):
-        seq = diff(x[:j]+x[j+1:])
-        if test(seq):
+        if test(diff(x[:j]+x[j+1:])):
             res += 1
             break
 
