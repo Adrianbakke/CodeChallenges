@@ -19,4 +19,3 @@ for x in X:
             break
 
 print(res)
-

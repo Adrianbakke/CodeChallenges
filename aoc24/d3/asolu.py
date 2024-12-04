@@ -26,7 +26,6 @@ def filter_mult(seq):
                 if seq[i] != "," and not seq[i].isnumeric():
                     fake = True
                     break
-
                 i += 1
             if not fake:
                 muls.append(list(map(int, seq[t:i].split(","))))
