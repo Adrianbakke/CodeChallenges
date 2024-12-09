@@ -1,82 +1,42 @@
-test_input = f"""$ cd /
-$ ls
-dir a
-14848514 b.txt
-8504156 c.dat
-dir d
-$ cd a
-$ ls
-dir e
-29116 f
-2557 g
-62596 h.lst
-$ cd e
-$ ls
-584 i
-$ cd ..
-$ cd ..
-$ cd d
-$ ls
-4060174 j
-8033020 d.log
-5626152 d.ext
-7214296 k""".splitlines()
+X = """190: 10 19
+3267: 81 40 27
+83: 17 5
+156: 15 6
+7290: 6 8 6 15
+161011: 16 10 13
+192: 17 8 14
+21037: 9 7 18 13
+292: 11 6 16 20""".splitlines()
 
-test_input.pop(0)
+X = open("input.txt","r").read().splitlines()
 
-input = open("input.txt", "r").read().splitlines()
-input.pop(0)
-
-test_input = input
-
-class Dir:
-    def __init__(self, name, parent) -> None:
-        self.name = name
-        self.parent = parent
-        self.child = []
-        self.content = []
-    def sz(self):
-        res = sum([int(x[0]) for x in self.content])
-        for c in self.child: res += c.sz()
+def rec(x, n=5, res=[]) -> list:
+    if len(x)==n:
+        res.append(x)
         return res
+    rec(x+"*", n=n, res=res)
+    rec(x+"+", n=n, res=res)
+    rec(x+"|", n=n, res=res)
+    return res
 
-cdir = Dir("/", None)
-c1dir = cdir
-
-ctnt = []
-while len(test_input)>0:
-    l = test_input.pop(0).split(" ")
-    if l[0] == "$":
-        ctnt = []
-        if l[1] == "cd":
-            if l[2] == "..":
-                c1dir = c1dir.parent
+res=[]
+for c,x in enumerate(X):
+    print(c,"/",len(X), end="\r")
+    ans, nums = x.split(": ")
+    nums = nums.split(" ")
+    combs = rec("",n=len(nums)-1, res=[])
+    evals = nums[0]
+    for c in combs:
+        evals = nums[0]
+        for n,o in zip(nums[1:],c):
+            if o == "|":
+                evals = str(evals) + n
             else:
-                for c in c1dir.child:
-                    if c.name == l[2]:
-                        c1dir = c
-                        break
-        continue
+                evals = eval(str(evals)+o+n)
 
-    tp, name = l
-    if tp == "dir":
-        c1dir.child.append(Dir(name, c1dir))
-    else:
-        c1dir.content.append([tp, name])
+        if eval(str(evals)) == int(ans):
+            res.append(int(ans))
+            break
 
+print(sum(res))
 
-NEEDED_SPACE = 30000000
-USED_SPACE = 70000000 - cdir.sz()
-
-res = []
-def rec(d):
-    sz = d.sz()
-    # if sz <= 100000: res.append(sz) # solu1
-    if USED_SPACE+sz >= NEEDED_SPACE: res.append(sz) # solu2
-    if d.child:
-        for c in d.child:
-            rec(c)
-
-rec(cdir)
-
-print(res, min(res))
