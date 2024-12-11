@@ -32,7 +32,6 @@ def move(r,c):
 res = defaultdict(list)
 res2 = defaultdict(int)
 for count, (r,c) in enumerate(zeropos):
-    print(count)
     Q = deque()
     Q.append([(r,c)])
     while Q:
@@ -58,8 +57,6 @@ for k,v in res.items():
     r += len(c)
 
 print(r)
-
-print(res2)
 
 r = 0
 for k,c in res2.items():
