@@ -20,14 +20,6 @@ regs = set(xx for x in X.splitlines() for xx in x)
 
 R,C=len(B),len(B[0])
 
-def move(r,c):
-    res = []
-    for dr,dc in [(0,1),(1,0),(-1,0),(0,-1)]:
-        nr,nc = r+dr,c+dc
-        if 0<=nr<R and 0<=nc<C:
-            res.append((nr,nc))
-    return res
-
 seen = set()
 grids = defaultdict(list)
 areas = []
@@ -37,7 +29,6 @@ for r in range(R):
         if (r,c) in seen:
             continue
         Q = deque()
-        #b = [(r,c)]
         b = []
         Q.append((r,c))
         edges = defaultdict(set)
@@ -60,7 +51,6 @@ for r in range(R):
             for rr,cc in v:
                 if (rr,cc) in seen_edges:
                     continue
-                #seen_edges.add((rr,cc))
                 side +=1
                 Q = deque([(rr,cc)])
                 while Q:
