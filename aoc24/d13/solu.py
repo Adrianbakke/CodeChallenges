@@ -32,15 +32,14 @@ for x in X:
 def solve(ax, ay, bx, by, px, py):
     m = np.array([[bx,ax-bx],[by, ay-by]], dtype=np.float64)
     x = np.array([px,py], dtype=np.float64 )
-    #n,k = list(map(int, (np.linalg.solve(m,x))))
     n,k = np.linalg.solve(m,x)
-    N = round(n)
-    K = round(k)
+    n = round(n)
+    k = round(k)
 
-    if N < 0 or K < 0:
+    if n < 0 or k < 0:
         return 0,0
-    if px==K*ax+(N-K)*bx and py==K*ay+(N-K)*by:
-        return 3*K, N-K
+    if px==k*ax+(n-k)*bx and py==k*ay+(n-k)*by:
+        return 3*k, n-k
     else:
         return 0,0
 
