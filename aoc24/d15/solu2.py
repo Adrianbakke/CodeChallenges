@@ -1,4 +1,3 @@
-from copy import deepcopy
 
 input = """##########
 #..O..O.O#
@@ -29,27 +28,52 @@ print(R,C)
 M = M.replace("\n","")
 
 def scale_map(original_map_lines):
+    """
+    Scale the map horizontally as described:
+    - '#' -> '##'
+    - '.' -> '..'
+    - 'O' -> '[]'
+    - '@' -> '@.'
+    
+    Return:
+      walls: set of (r,c) for each wall cell
+      boxes: set of (r,c) for each box top-left position
+      robot: (r,c) position of the robot
+    """
     walls = set()
     boxes = set()
     robot = None
+    
     for r, line in enumerate(original_map_lines):
+        # Each original character becomes two chars horizontally
+        # We'll record them in walls/boxes/robot sets as needed
         col_out = 0
         c = 0
         print(line)
         for c in line:
 
             if c == '#':
+                # '#' -> '##'
                 walls.add((r, col_out))
                 walls.add((r, col_out+1))
                 col_out += 2
             elif c == '.':
+                # '.' -> '..'
+                # no walls, no boxes
                 col_out += 2
             elif c == 'O':
+                # 'O' -> '[]'
+                # store box top-left at (r, col_out)
                 boxes.add(((r, col_out), (r,col_out+1)))
                 col_out += 2
             elif c == '@':
+                # '@' -> '@.'
+                # store robot at (r, col_out)
                 robot = (r, col_out)
                 col_out += 2
+            else:
+                raise ValueError("Unknown character in map.")
+    
     return walls, boxes, robot
 
 
@@ -59,6 +83,7 @@ def simulate_moves(walls, boxes, robot, moves_str):
     simulate the moves. Each move is one of '^','v','<','>'.
     Update boxes and robot as moves are applied.
     """
+    # Directions
     dirs = {
         '^': (-1, 0),
         'v': (1, 0),
@@ -90,10 +115,14 @@ def simulate_moves(walls, boxes, robot, moves_str):
             _inner(box(rr,cc))
             return su
 
+        # Check if there's a box at (nr, nc)
+        from copy import deepcopy
         if box(nr,nc):
+            # We need to push the box/boxes
+            # Find a chain of boxes in the direction of movement
             chain_r, chain_c = nr, nc
             bt = get_union(chain_r, chain_c)
-            old_list = deepcopy(bt)
+            old_list = {x for x in bt}
             t = 0
             while len(old_list) > t:
                 t = len(old_list)
@@ -101,6 +130,25 @@ def simulate_moves(walls, boxes, robot, moves_str):
                     old_list = get_union(b1[0]+dr, b1[1]+dc) | get_union(b2[0]+dr, b2[1]+dc) | old_list
                 bt = deepcopy(old_list)
 
+            # def get_union(rr, cc, boxes, dr, dc):
+            #     to_visit = [(rr, cc)]
+            #     visited = set()
+            #
+            #     while to_visit:
+            #         current_r, current_c = to_visit.pop()
+            #         if (current_r, current_c) in visited:
+            #             continue
+            #
+            #         visited.add((current_r, current_c))
+            #         current_box = [subset for subset in boxes if (current_r, current_c) in subset]
+            #
+            #         for box in current_box:
+            #             for br, bc in box:
+            #                 next_r, next_c = br + dr, bc + dc
+            #                 if (next_r, next_c) not in visited:
+            #                     to_visit.append((next_r, next_c))
+            #
+            #     return visited
 
             push_list = {((b1[0]+dr, b1[1]+dc), (b2[0]+dr, b2[1]+dc)) for b1,b2 in old_list}
 
@@ -123,10 +171,15 @@ def simulate_moves(walls, boxes, robot, moves_str):
 
         print_board(walls, boxes, (robot_r, robot_c))
 
+    # Return the final positions
     return boxes, (robot_r, robot_c)
 
 
 def compute_gps_sum(boxes):
+    """
+    Compute the sum of GPS coordinates for all boxes.
+    GPS = 100 * row + col
+    """
     total = 0
 
     for b in boxes:
@@ -136,6 +189,10 @@ def compute_gps_sum(boxes):
     return total
 
 def print_board(walls, boxes, robot):
+    """
+    Print the current state of the board with walls, boxes, and robot.
+    """
+
     board = [['.' for _ in range(C)] for _ in range(R)]
 
     for r, c in walls:
@@ -154,10 +211,18 @@ def print_board(walls, boxes, robot):
         print(''.join(row))
 
 
+# Example usage (pseudocode):
+# original_map_lines = [...]  # The input lines of the original map
+# moves_lines = [...]         # The lines with moves, concatenated into a single string
+#
+# moves_str = "".join(line.strip() for line in moves_lines)
 walls, boxes, robot = scale_map(B)
 print_board(walls, boxes, robot)
 
 boxes, robot = simulate_moves(walls, boxes, robot, M)
 answer = compute_gps_sum(boxes)
 print(answer)
+
+# Example usage to print the board state:
+print_board(walls, boxes, robot)
 
